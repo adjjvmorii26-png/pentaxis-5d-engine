@@ -1,0 +1,26 @@
+{
+  "issuer": "ixpansion",
+  "wave": 247,
+  "repo": "pentaxis-5d-engine",
+  "stones_count": 1,
+  "stones": ["BRIDGE-PENTAXIS-5D"],
+  "total_stones_in_constellation": 43,
+  "neighbors": [
+    "chronocrypt-orrery",
+    "echotide-engine",
+    "ixpansion",
+    "NDSO-Engine",
+    "omega-fractal-engine",
+    "oracle-engine",
+    "polychron-atlas",
+    "paraconstruct-engine",
+    "probability-engine",
+    "quantum-folio",
+    "sensorium-engine",
+    "topologic-alchemy"
+  ],
+  "return_path": "https://ixpansion.vercel.app/cross_repo_commune",
+  "seal": "private-codespace",
+  "axes": ["space", "time", "state", "mind", "meta"],
+  "projection": "P(Σ,Τ,Ψ,Μ,Ω)→R³"
+}

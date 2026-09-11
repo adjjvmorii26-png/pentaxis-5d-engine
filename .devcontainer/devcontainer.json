@@ -1,0 +1,23 @@
+{
+  "name": "PENTAXIS 5D Engine",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": {
+      "label": "Pentaxis projection",
+      "onAutoForward": "notify"
+    }
+  },
+  "postCreateCommand": "npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  },
+  "remoteEnv": {
+    "VITE_AUTH_ENABLED": "false"
+  }
+}

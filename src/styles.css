@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #07080a;
+  --color-surface: #111318;
+  --color-surface-2: #181b22;
+  --color-fg: #eceae4;
+  --color-muted: #8b919c;
+  --color-faint: #5c616a;
+  --color-border: #262a33;
+  --color-accent: #9eb4c8;
+  --color-accent-fg: #07080a;
+  --color-danger: #c47d78;
+  --color-ok: #7d9e8f;
+  --color-axis-space: #8eb4c8;
+  --color-axis-time: #b8a890;
+  --color-axis-state: #7da8a0;
+  --color-axis-mind: #b09098;
+  --color-axis-meta: #c8ccd4;
+
+  --font-sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Syne", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-3xl: 3.25rem;
+}
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  html,
+  body,
+  #app {
+    height: 100%;
+    background: var(--color-bg);
+    color: var(--color-fg);
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.hud-num {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+
+.panel-enter {
+  animation: panel-in 250ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.stagger-in > * {
+  animation: rise 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.stagger-in > *:nth-child(1) {
+  animation-delay: 40ms;
+}
+.stagger-in > *:nth-child(2) {
+  animation-delay: 80ms;
+}
+.stagger-in > *:nth-child(3) {
+  animation-delay: 120ms;
+}
+.stagger-in > *:nth-child(4) {
+  animation-delay: 160ms;
+}
+.stagger-in > *:nth-child(5) {
+  animation-delay: 200ms;
+}
+.stagger-in > *:nth-child(6) {
+  animation-delay: 240ms;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.crosshair {
+  width: 10px;
+  height: 10px;
+  border: 1px solid color-mix(in oklab, var(--color-fg) 55%, transparent);
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-bg) 70%, transparent);
+}
+
+.log-line {
+  animation: log-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes log-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

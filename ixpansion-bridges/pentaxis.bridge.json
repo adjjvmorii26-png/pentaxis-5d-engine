@@ -1,0 +1,17 @@
+{
+  "bridge_id": "BRIDGE-PENTAXIS-5D",
+  "from": "pentaxis-5d-engine",
+  "to": "ixpansion",
+  "kind": "dimensional-projection",
+  "protocol": "5-tuple entity → organism ledger",
+  "exports": {
+    "entropy": "Μ decision-entropy H is a first-class coordinate",
+    "coherence": "projection hit-points; 0 = collapse ending",
+    "queries": "Ω coordinate; rule mutation threshold",
+    "timeline": "Τ tracks 0/1/2 + reverse ring buffer"
+  },
+  "imports": {
+    "ethics_gate": "observe-before-act; no force-collapse without paradox cost",
+    "proof_ledger": "A0 (proof) does not decay — Codex remains honest when HUD lies"
+  }
+}
