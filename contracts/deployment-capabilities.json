@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "repository": "pentaxis-5d-engine",
+  "runtime": {"node": "22", "build_command": "npm run build", "typecheck_command": "npm run typecheck", "test_command": "npm test"},
+  "targets": [
+    {"name": "cloudflare", "status": "candidate", "requires": ["nitro-adapter-compatibility", "provider-runtime-validation"]},
+    {"name": "deno-deploy", "status": "candidate", "requires": ["node-compatibility-validation", "provider-runtime-validation"]},
+    {"name": "cloud-run", "status": "candidate", "requires": ["container-runtime-validation", "provider-runtime-validation"]}
+  ],
+  "authority": "descriptive-only",
+  "human_gate_required": true
+}
