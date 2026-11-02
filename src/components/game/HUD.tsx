@@ -56,7 +56,11 @@ export function HUD() {
         </div>
       )}
 
-      <div className="absolute bottom-24 left-1/2 flex w-[min(92vw,520px)] -translate-x-1/2 flex-col items-center gap-1 sm:bottom-10">
+      <div
+        className={`absolute left-1/2 flex w-[min(92vw,520px)] -translate-x-1/2 flex-col items-center gap-1 sm:bottom-10 ${
+          isTouch ? "bottom-52" : "bottom-24"
+        }`}
+      >
         {logs.slice(-3).map((l) => (
           <p
             key={l.id}
@@ -94,7 +98,7 @@ export function HUD() {
         )}
       </div>
 
-      <div className={`absolute right-3 text-right sm:right-5 ${isTouch ? "bottom-36" : "bottom-4"}`}>
+      <div className={`absolute right-3 text-right sm:right-5 ${isTouch ? "bottom-52" : "bottom-4"}`}>
         <p className="font-mono text-[10px] tracking-[0.18em] text-faint uppercase">
           Τ {TRACK[timeline]} {reversing ? "· reverse" : ""}
         </p>

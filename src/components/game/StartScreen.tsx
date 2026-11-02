@@ -59,8 +59,9 @@ export function StartScreen({ onEnter }: { onEnter: () => void }) {
             ))}
           </div>
           <p className="self-end text-xs leading-relaxed text-faint sm:text-right">
-            The engine is already watching. Codex lives under Tab. Mobile uses
-            the sticks after you enter.
+            The engine is already watching. Codex lives under Tab. On touch
+            screens, enter and use the on-screen sticks and pads — tap GYRO to
+            steer by tilting the device.
           </p>
         </footer>
       </div>

@@ -55,7 +55,6 @@ export class Engine {
   chamberTime: Record<string, number> = {};
   lastLookRate = 0;
   pointerLocked = false;
-  touchLook = false;
   ritualFlash = 0;
   ended = false;
   streams = makeStreams(this.save.seed);
@@ -99,19 +98,31 @@ export class Engine {
     }
   }
 
+  private boundMouseMove?: (e: MouseEvent) => void;
+  private boundPointerLock?: () => void;
+
   bindPointer() {
-    this.canvas.addEventListener("mousemove", (e) => {
+    this.boundMouseMove = (e: MouseEvent) => {
       if (!this.pointerLocked) return;
       this.input.lookX += e.movementX;
       this.input.lookY += e.movementY;
-    });
-    document.addEventListener("pointerlockchange", () => {
+    };
+    this.boundPointerLock = () => {
       this.pointerLocked = document.pointerLockElement === this.canvas;
       const phase = useGame.getState().phase;
       if (!this.pointerLocked && phase === "playing") {
         useGame.setState({ phase: "paused" });
       }
-    });
+    };
+    this.canvas.addEventListener("mousemove", this.boundMouseMove);
+    document.addEventListener("pointerlockchange", this.boundPointerLock);
+  }
+
+  unbindPointer() {
+    if (this.boundMouseMove) this.canvas.removeEventListener("mousemove", this.boundMouseMove);
+    if (this.boundPointerLock) document.removeEventListener("pointerlockchange", this.boundPointerLock);
+    this.boundMouseMove = undefined;
+    this.boundPointerLock = undefined;
   }
 
   requestLock() {
@@ -819,6 +830,7 @@ export class Engine {
   }
 
   dispose() {
+    this.unbindPointer();
     this.input.detach();
     this.persist();
     this.world.dispose();

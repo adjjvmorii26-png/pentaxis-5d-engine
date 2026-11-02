@@ -16,6 +16,10 @@ export type Actions = {
   codexPressed: boolean;
 };
 
+// Touch deadzone configuration - prevents jitter on touch screens
+const TOUCH_DEADZONE = 0.08;
+const TOUCH_SENSITIVITY = 1;
+
 const GAME_CODES = new Set([
   "KeyW",
   "KeyA",
@@ -63,11 +67,27 @@ export class Input {
   prevTimeline = [false, false, false];
   invertY = false;
   lookSensitivity = 1;
+  touchSensitivity = 1;
+  touchDeadzone = TOUCH_DEADZONE;
+  // Touch gesture state for swipe/pinch detection
+  touchStart: { x: number; y: number; time: number } | null = null;
+  touchLastX = 0;
+  touchLastY = 0;
+  // Track whether touch is being used (to disable mouse look when on touch devices)
+  isTouchActive = false;
+  // Device-orientation ("gyro") motion tracking
+  gyroEnabled = false;
+  gyroGain = 0.9;
+  private gyroLast: { alpha: number; beta: number } | null = null;
 
   constructor() {
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
     this.onBlur = this.onBlur.bind(this);
+    this.onTouchStart = this.onTouchStart.bind(this);
+    this.onTouchMove = this.onTouchMove.bind(this);
+    this.onTouchEnd = this.onTouchEnd.bind(this);
+    this.onDeviceOrientation = this.onDeviceOrientation.bind(this);
   }
 
   attach() {
@@ -75,6 +95,11 @@ export class Input {
     window.addEventListener("keyup", this.onKeyUp);
     window.addEventListener("blur", this.onBlur);
     document.addEventListener("visibilitychange", this.onBlur);
+    // Add touch event listeners for motion tracking
+    window.addEventListener("touchstart", this.onTouchStart, { passive: false });
+    window.addEventListener("touchmove", this.onTouchMove, { passive: false });
+    window.addEventListener("touchend", this.onTouchEnd);
+    window.addEventListener("touchcancel", this.onTouchEnd);
   }
 
   detach() {
@@ -82,6 +107,100 @@ export class Input {
     window.removeEventListener("keyup", this.onKeyUp);
     window.removeEventListener("blur", this.onBlur);
     document.removeEventListener("visibilitychange", this.onBlur);
+    window.removeEventListener("touchstart", this.onTouchStart);
+    window.removeEventListener("touchmove", this.onTouchMove);
+    window.removeEventListener("touchend", this.onTouchEnd);
+    window.removeEventListener("touchcancel", this.onTouchEnd);
+    this.disableGyro();
+  }
+
+  onTouchStart(e: TouchEvent) {
+    if (e.touches.length > 0) {
+      const touch = e.touches[0];
+      this.touchStart = { x: touch.clientX, y: touch.clientY, time: performance.now() };
+      this.touchLastX = touch.clientX;
+      this.touchLastY = touch.clientY;
+      this.isTouchActive = true;
+    }
+  }
+
+  onTouchMove(e: TouchEvent) {
+    if (!this.touchStart || e.touches.length === 0) return;
+    const touch = e.touches[0];
+    const dx = touch.clientX - this.touchLastX;
+    const dy = touch.clientY - this.touchLastY;
+    this.touchLastX = touch.clientX;
+    this.touchLastY = touch.clientY;
+    // Allow mobile controls to override this if they're handling the touch
+    // This is a fallback for direct canvas touch dragging
+  }
+
+  onTouchEnd() {
+    this.touchStart = null;
+    this.touchLastX = 0;
+    this.touchLastY = 0;
+    // Keep isTouchActive true for the session once touch is detected
+  }
+
+  /**
+   * Enable device-orientation motion tracking ("gyro look").
+   * On iOS 13+ this requires a user gesture and a permission prompt, so it
+   * resolves to false if permission is denied or the API is unavailable.
+   */
+  async requestGyro(): Promise<boolean> {
+    if (typeof window === "undefined" || typeof window.DeviceOrientationEvent === "undefined") {
+      return false;
+    }
+    const ctor = window.DeviceOrientationEvent as unknown as {
+      requestPermission?: () => Promise<"granted" | "denied">;
+    };
+    if (typeof ctor.requestPermission === "function") {
+      try {
+        const result = await ctor.requestPermission();
+        if (result !== "granted") return false;
+      } catch {
+        return false;
+      }
+    }
+    this.gyroLast = null;
+    this.gyroEnabled = true;
+    window.addEventListener("deviceorientation", this.onDeviceOrientation);
+    return true;
+  }
+
+  disableGyro() {
+    if (typeof window !== "undefined") {
+      window.removeEventListener("deviceorientation", this.onDeviceOrientation);
+    }
+    this.gyroEnabled = false;
+    this.gyroLast = null;
+  }
+
+  onDeviceOrientation(e: DeviceOrientationEvent) {
+    if (!this.gyroEnabled || e.alpha == null || e.beta == null) return;
+    if (!this.gyroLast) {
+      // First reading only establishes a baseline to avoid a jump.
+      this.gyroLast = { alpha: e.alpha, beta: e.beta };
+      return;
+    }
+    let dAlpha = e.alpha - this.gyroLast.alpha;
+    if (dAlpha > 180) dAlpha -= 360;
+    if (dAlpha < -180) dAlpha += 360;
+    const dBeta = e.beta - this.gyroLast.beta;
+    this.gyroLast = { alpha: e.alpha, beta: e.beta };
+
+    const gain = this.gyroGain * this.touchSensitivity;
+    // Accumulate as look pixels so it flows through consumeLook() like a mouse.
+    this.lookX += dAlpha * gain;
+    this.lookY += dBeta * gain;
+  }
+
+  // Apply radial deadzone to touch input values
+  applyTouchDeadzone(x: number, y: number): { x: number; y: number } {
+    const m = Math.hypot(x, y);
+    if (m < this.touchDeadzone) return { x: 0, y: 0 };
+    const scale = (m - this.touchDeadzone) / (1 - this.touchDeadzone) / m;
+    return { x: x * scale * this.touchSensitivity, y: y * scale * this.touchSensitivity };
   }
 
   onKeyDown(e: KeyboardEvent) {
@@ -119,9 +238,15 @@ export class Input {
     return { x, y };
   }
 
+  // Get normalized touch input with deadzone applied
+  getTouchMove(): { x: number; y: number } {
+    return this.applyTouchDeadzone(this.touchMoveX, this.touchMoveY);
+  }
+
   poll(): Actions {
-    let moveX = this.touchMoveX;
-    let moveY = this.touchMoveY;
+    const touch = this.getTouchMove();
+    let moveX = touch.x;
+    let moveY = touch.y;
     if (this.held("KeyD") || this.held("ArrowRight")) moveX += 1;
     if (this.held("KeyA") || this.held("ArrowLeft")) moveX -= 1;
     if (this.held("KeyW") || this.held("ArrowUp")) moveY += 1;
@@ -131,7 +256,6 @@ export class Input {
       moveX /= ml;
       moveY /= ml;
     }
-
     const pads = typeof navigator !== "undefined" ? navigator.getGamepads?.() : null;
     if (pads) {
       for (const pad of pads) {
