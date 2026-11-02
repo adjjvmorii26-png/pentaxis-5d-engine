@@ -42,6 +42,19 @@ export function HUD() {
               style={{ width: `${Math.max(0, Math.min(100, coherence))}%` }}
             />
           </div>
+          {isTouch && (
+            <>
+              <p className="mt-2 font-mono text-[10px] tracking-[0.18em] text-faint uppercase">
+                Τ {TRACK[timeline]} {reversing ? "· rev" : ""}
+              </p>
+              <p className="hud-num text-sm text-fg">
+                {Math.round(cognition)} <span className="text-[9px] text-muted">cog</span>
+              </p>
+              <div className="mt-1 ml-auto h-1 w-20 overflow-hidden rounded-full bg-surface-2">
+                <div className="h-full bg-axis-mind" style={{ width: `${Math.round(entropy * 100)}%` }} />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -57,8 +70,8 @@ export function HUD() {
       )}
 
       <div
-        className={`absolute left-1/2 flex w-[min(92vw,520px)] -translate-x-1/2 flex-col items-center gap-1 sm:bottom-10 ${
-          isTouch ? "bottom-52" : "bottom-24"
+        className={`absolute left-1/2 flex w-[min(92vw,520px)] -translate-x-1/2 flex-col items-center gap-1 ${
+          isTouch ? "top-20 sm:top-24" : "bottom-24 sm:bottom-10"
         }`}
       >
         {logs.slice(-3).map((l) => (
@@ -98,23 +111,29 @@ export function HUD() {
         )}
       </div>
 
-      <div className={`absolute right-3 text-right sm:right-5 ${isTouch ? "bottom-52" : "bottom-4"}`}>
-        <p className="font-mono text-[10px] tracking-[0.18em] text-faint uppercase">
-          Τ {TRACK[timeline]} {reversing ? "· reverse" : ""}
-        </p>
-        <p className="hud-num mt-1 text-sm text-fg">{Math.round(cognition)}</p>
-        <p className="text-[10px] text-muted">cognition</p>
-        <div className="mt-2 ml-auto h-16 w-1.5 overflow-hidden rounded-full bg-surface-2">
-          <div
-            className="w-full bg-axis-mind"
-            style={{ height: `${Math.round(entropy * 100)}%`, marginTop: `${Math.round((1 - entropy) * 100)}%` }}
-          />
+      {!isTouch && (
+        <div className="absolute right-3 bottom-4 text-right sm:right-5">
+          <p className="font-mono text-[10px] tracking-[0.18em] text-faint uppercase">
+            Τ {TRACK[timeline]} {reversing ? "· reverse" : ""}
+          </p>
+          <p className="hud-num mt-1 text-sm text-fg">{Math.round(cognition)}</p>
+          <p className="text-[10px] text-muted">cognition</p>
+          <div className="mt-2 ml-auto h-16 w-1.5 overflow-hidden rounded-full bg-surface-2">
+            <div
+              className="w-full bg-axis-mind"
+              style={{ height: `${Math.round(entropy * 100)}%`, marginTop: `${Math.round((1 - entropy) * 100)}%` }}
+            />
+          </div>
+          <p className="mt-1 font-mono text-[10px] text-faint">H</p>
         </div>
-        <p className="mt-1 font-mono text-[10px] text-faint">H</p>
-      </div>
+      )}
 
       {metaAlert && (
-        <p className="absolute top-20 left-1/2 w-[min(92vw,420px)] -translate-x-1/2 text-center font-mono text-[11px] text-axis-meta">
+        <p
+          className={`absolute left-1/2 w-[min(92vw,420px)] -translate-x-1/2 text-center font-mono text-[11px] text-axis-meta ${
+            isTouch ? "top-40" : "top-20"
+          }`}
+        >
           {metaAlert}
         </p>
       )}

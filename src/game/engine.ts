@@ -3,7 +3,7 @@ import { audio } from "./core/audio";
 import { Input } from "./core/input";
 import { Juice } from "./core/juice";
 import { loadSave, loadSettings, newCycle, writeSave, writeSettings, type SaveData } from "./core/save";
-import { AXES, EMPTY_KEYS, type AxisId, type Ending, type Keys } from "./core/types";
+import { AXES, EMPTY_KEYS, type AxisId, type Ending } from "./core/types";
 import { ARCHIVIST, CHORUS, ENGINE_LINES, HINTS } from "./content/voices";
 import { keyCount, pushLog, useGame } from "./store";
 import { collideXZ, groundY, headBump } from "./sim/collision";
@@ -17,7 +17,6 @@ const GRAVITY = 22;
 const JUMP = 7.4;
 const WALK = 5.6;
 const SPRINT = 8.4;
-const FIXED = 1 / 60;
 const HISTORY = 8 * 20;
 
 type Vec = { x: number; y: number; z: number };
@@ -131,13 +130,12 @@ export class Engine {
   }
 
   installControlsProbe() {
-    const self = this;
     window.__controlsTest = {
-      getYaw: () => self.yaw,
-      getSpeed: () => self.speed,
-      setKeys: (codes: string[]) => self.input.setKeys(codes),
-      getPosition: () => ({ x: self.pos.x, y: self.pos.y, z: self.pos.z }),
-      getPitch: () => self.pitch,
+      getYaw: () => this.yaw,
+      getSpeed: () => this.speed,
+      setKeys: (codes: string[]) => this.input.setKeys(codes),
+      getPosition: () => ({ x: this.pos.x, y: this.pos.y, z: this.pos.z }),
+      getPitch: () => this.pitch,
     };
   }
 

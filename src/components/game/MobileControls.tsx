@@ -14,7 +14,11 @@ function Stick({
   const [pos, setPos] = useState({ x: 0, y: 0 });
 
   const down = (e: PE<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Some browsers/pointers reject capture; dragging still works without it.
+    }
     origin.current = { x: e.clientX, y: e.clientY, id: e.pointerId };
     setPos({ x: 0, y: 0 });
   };
@@ -137,6 +141,8 @@ export function MobileControls() {
       input.touchMoveY = 0;
       input.touchLookX = 0;
       input.touchLookY = 0;
+      input.touchLookVX = 0;
+      input.touchLookVY = 0;
     };
   }, []);
 
@@ -171,8 +177,9 @@ export function MobileControls() {
           onChange={(x, y) => {
             const input = engine()?.input;
             if (!input) return;
-            input.touchLookX = x * 16;
-            input.touchLookY = y * 12;
+            // Persistent deflection: the camera keeps turning while the stick is held.
+            input.touchLookVX = x;
+            input.touchLookVY = y;
           }}
         />
       </div>

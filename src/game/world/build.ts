@@ -419,7 +419,7 @@ export function buildWorld(scene: THREE.Scene, seed: string): World {
   scene.add(hemi);
   const amb = new THREE.AmbientLight(0x6c7380, 0.22);
   scene.add(amb);
-  AXES.forEach((axis, i) => {
+  AXES.forEach((axis) => {
     const x = Math.cos(axis.angle) * (ATRIUM_R - 1.2);
     const z = Math.sin(axis.angle) * (ATRIUM_R - 1.2);
     const l = new THREE.PointLight(axis.color, 2.4, 16, 2);

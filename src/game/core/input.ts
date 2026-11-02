@@ -59,6 +59,9 @@ export class Input {
   touchMoveY = 0;
   touchLookX = 0;
   touchLookY = 0;
+  // Persistent deflection from the on-screen look stick (keeps turning while held)
+  touchLookVX = 0;
+  touchLookVY = 0;
   prevJump = false;
   prevObserve = false;
   prevQuery = false;
@@ -67,7 +70,7 @@ export class Input {
   prevTimeline = [false, false, false];
   invertY = false;
   lookSensitivity = 1;
-  touchSensitivity = 1;
+  touchSensitivity = TOUCH_SENSITIVITY;
   touchDeadzone = TOUCH_DEADZONE;
   // Touch gesture state for swipe/pinch detection
   touchStart: { x: number; y: number; time: number } | null = null;
@@ -125,14 +128,19 @@ export class Input {
   }
 
   onTouchMove(e: TouchEvent) {
-    if (!this.touchStart || e.touches.length === 0) return;
+    if (!this.touchStart || e.touches.length !== 1) return;
     const touch = e.touches[0];
     const dx = touch.clientX - this.touchLastX;
     const dy = touch.clientY - this.touchLastY;
     this.touchLastX = touch.clientX;
     this.touchLastY = touch.clientY;
-    // Allow mobile controls to override this if they're handling the touch
-    // This is a fallback for direct canvas touch dragging
+    // Fallback "swipe to look": only when dragging directly on the canvas,
+    // so the on-screen look stick (which sets touchLookX/Y itself) is not doubled.
+    const target = e.target as HTMLElement | null;
+    if (target?.tagName === "CANVAS") {
+      this.touchLookX += dx * 0.9;
+      this.touchLookY += dy * 0.6;
+    }
   }
 
   onTouchEnd() {
@@ -229,8 +237,8 @@ export class Input {
   }
 
   consumeLook() {
-    const x = this.lookX + this.touchLookX;
-    const y = this.lookY + this.touchLookY;
+    const x = this.lookX + this.touchLookX + this.touchLookVX * 10;
+    const y = this.lookY + this.touchLookY + this.touchLookVY * 7;
     this.lookX = 0;
     this.lookY = 0;
     this.touchLookX = 0;
